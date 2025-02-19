@@ -1,0 +1,107 @@
+{% extends 'survey/base.html' %}
+
+{% block title %}Modifier le Sondage{% endblock %}
+
+{% block nav %}
+{% include "survey/nav.html" %}
+{% endblock nav %}
+
+{% block content %}
+<!-- Section principale -->
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <!-- Card de modification avec style moderne -->
+            <div class="card shadow-lg border-0 rounded-lg">
+                <div class="card-header text-center bg-primary text-white">
+                    <h4 class="font-weight-bold">Modifier le Sondage</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Formulaire de mise à jour -->
+                    <form method="POST">
+                        {% csrf_token %}
+                        {% for field in form %}
+                            <div class="form-group mb-4">
+                                <label for="{{ field.id_for_label }}" class="font-weight-bold">{{ field.label }}</label>
+                                {{ field }}
+                                {% if field.errors %}
+                                    <div class="alert alert-danger mt-2">
+                                        {% for error in field.errors %}
+                                            <p>{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+
+                        <!-- Boutons de soumission -->
+                        <div class="d-flex justify-content-between">
+                            <button type="submit" class="btn btn-success btn-lg w-48">Sauvegarder les Modifications</button>
+                            <a href="{% url 'liste' %}" class="btn btn-secondary btn-lg w-48">Annuler</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Style personnalisé pour améliorer l'apparence -->
+<style>
+    body {
+        background-color: #f0f4f8; /* Fond clair et moderne */
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .card-header {
+        background-color: #007bff; /* Bleu vif pour attirer l'attention */
+        color: white;
+    }
+
+    .card-body {
+        background-color: #ffffff;
+        color: #333;
+        padding: 30px;
+        border-radius: 8px;
+    }
+
+    .form-group input, .form-group textarea, .form-group select {
+        border-radius: 5px;
+        border: 1px solid #ced4da;
+        padding: 10px;
+        width: 100%;
+        font-size: 1rem;
+    }
+
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+        border-color: #007bff;
+        outline: none;
+    }
+
+    .btn {
+        font-size: 1.1rem;
+        font-weight: bold;
+        border-radius: 50px;
+        padding: 12px 24px;
+    }
+
+    .btn:hover {
+        transform: translateY(-3px);
+        transition: all 0.3s ease;
+    }
+
+    .btn:active {
+        transform: translateY(1px);
+    }
+
+    .alert-danger {
+        background-color: #f8d7da;
+        border-color: #f5c6cb;
+    }
+</style>
+
+{% endblock content %}
+
+{% block footer %}
+{% include "survey/footer.html" %}
+{% endblock footer %}

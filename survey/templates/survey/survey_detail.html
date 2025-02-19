@@ -1,0 +1,100 @@
+{% extends 'survey/base.html' %}
+
+{% block title %}Détails du Sondage{% endblock %}
+
+{% block nav %}
+    {% include "survey/nav.html" %}
+{% endblock nav %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-lg border-0 rounded-lg">
+                <div class="card-header text-center bg-primary text-white">
+                    <h4 class="font-weight-bold">{{ survey.title }}</h4>
+                </div>
+                <div class="card-body">
+                    <p class="lead">{{ survey.description }}</p>
+                    <p><strong>Date de début :</strong> {{ survey.start_date }}</p>
+                    <p><strong>Date de fin :</strong> {{ survey.end_date }}</p>
+                    <p><strong>Créé par :</strong> {{ survey.creator.first_name }}</p>
+
+                    <!-- Affichage des questions du sondage -->
+                    <h5 class="mt-4">Questions du Sondage :</h5>
+                    {% if questions %}
+                        <ul class="list-group list-group-flush">
+                            {% for question in questions %}
+                                <li class="list-group-item">
+                                    <strong>{{ question.text }}</strong>
+                                    <br>
+                                    <small>Type: {{ question.get_question_type_display }}</small>
+                                    <!-- Si c'est une question à choix, afficher les choix -->
+                                    {% if question.question_type != 'text' %}
+                                        <ul>
+                                            {% for choice in question.choices.all %}
+                                                <li>{{ choice.text }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p>Aucune question pour ce sondage.</p>
+                    {% endif %}
+                    
+                    <!-- Bouton pour retourner à la liste des sondages -->
+                    <a href="{% url 'liste' %}" class="btn btn-secondary mt-3">Retour à la liste</a>
+                    <a href="{% url 'add_question' survey.id %}" class="btn btn-secondary mt-3">Ajouter Une Question</a>
+                    <a href="{% url 'survey_responses' survey.id %}" class="btn btn-secondary mt-3">Reponse</a>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Style personnalisé pour améliorer l'apparence -->
+<style>
+    body {
+        background-color: #f0f4f8;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .card-header {
+        background-color: #007bff;
+        color: white;
+    }
+
+    .card-body {
+        background-color: #ffffff;
+        padding: 30px;
+        border-radius: 8px;
+    }
+
+    .list-group-item {
+        background-color: #f9f9f9;
+    }
+
+    .btn {
+        font-size: 1.1rem;
+        font-weight: bold;
+        border-radius: 50px;
+        padding: 12px 24px;
+    }
+
+    .btn:hover {
+        transform: translateY(-3px);
+        transition: all 0.3s ease;
+    }
+
+    .btn:active {
+        transform: translateY(1px);
+    }
+</style>
+{% endblock content %}
+
+{% block footer %}
+    {% include "survey/footer.html" %}
+{% endblock footer %}

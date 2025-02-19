@@ -1,0 +1,155 @@
+{% extends 'survey/base.html' %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="card custom-card shadow-lg border-0">
+    <div class="card-header text-white text-center custom-card-header py-4">
+      <h2 class="mb-1">Réponses de {{ response.user.first_name }} {{ response.user.last_name }}</h2>
+      <p class="mb-0">Sondage : {{ response.survey.title }}</p>
+    </div>
+    <div class="card-body">
+      {% for question, answers in answers_by_question.items %}
+      <div class="question-response mb-4">
+        <h4 class="question-text mb-3">{{ forloop.counter }}. {{ question.text }}</h4>
+        <div class="answer-content ml-4">
+          {% if question.question_type == 'text' %}
+          <div class="text-answer">
+            {{ answers.0.text_answer }}
+          </div>
+          {% elif question.question_type == 'single_choice' %}
+          <div class="choice-answer">
+            {{ answers.0.choice.text }}
+          </div>
+          {% elif question.question_type == 'multiple_choice' %}
+          <ul class="multiple-choices">
+            {% for answer in answers %}
+            <li>{{ answer.choice.text }}</li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+        </div>
+      </div>
+      {% if not forloop.last %}
+      <hr class="my-4">
+      {% endif %}
+      {% endfor %}
+      <div class="text-center mt-4">
+        <a href="{% url 'survey_responses' response.survey.id %}" class="btn custom-btn btn-primary rounded-pill">
+          Retour à la liste des réponses
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Styles ultra-premium -->
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #f6f9fc, #e9eff5);
+    margin: 0;
+    padding: 0;
+  }
+  .custom-card {
+    border-radius: 20px;
+    overflow: hidden;
+    animation: fadeInUp 0.8s ease-out;
+  }
+  .custom-card-header {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    padding: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  .custom-card-header h2 {
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+  .custom-card-header p {
+    font-size: 1rem;
+    opacity: 0.9;
+  }
+  .card-body {
+    padding: 2rem;
+  }
+  .question-response {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 10px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .question-response:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+  .question-text {
+    color: #2c3e50;
+    font-weight: 600;
+  }
+  .answer-content {
+    background-color: #ffffff;
+    padding: 15px;
+    border-radius: 5px;
+    border-left: 4px solid #007bff;
+  }
+  .text-answer, .choice-answer {
+    white-space: pre-wrap;
+    font-size: 1rem;
+    color: #333;
+  }
+  .multiple-choices {
+    list-style: none;
+    padding-left: 1rem;
+    margin: 0;
+  }
+  .multiple-choices li {
+    position: relative;
+    padding-left: 1.2rem;
+    margin-bottom: 5px;
+    color: #333;
+  }
+  .multiple-choices li:before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: #007bff;
+  }
+  .custom-btn {
+    background: linear-gradient(135deg, #36d1dc, #5b86e5);
+    border: none;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .custom-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 14px rgba(53, 153, 255, 0.4);
+  }
+  .custom-btn:active {
+    transform: translateY(0);
+  }
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @media (max-width: 768px) {
+    .custom-card-header h2 {
+      font-size: 1.5rem;
+    }
+    .custom-card-header p {
+      font-size: 0.9rem;
+    }
+    .custom-btn {
+      font-size: 0.9rem;
+      padding: 0.5rem 1rem;
+    }
+  }
+</style>
+{% endblock %}

@@ -1,0 +1,160 @@
+{% extends 'survey/base.html' %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="card custom-card shadow-lg border-0">
+    <div class="card-header text-white text-center custom-card-header">
+      <a class="fas fa-eye" href = "{% url "liste" %}" >Retoure</a>
+      <h2 class="mb-1">Réponses au sondage : {{ survey.title }}</h2>
+      <p class="mb-0">Total des réponses : {{ total_responses }}</p>
+    </div>
+    <div class="card-body">
+      {% if responses %}
+        <div class="table-responsive">
+          <table class="table table-hover align-middle custom-table">
+            <thead>
+              <tr>
+                <th class="text-center">Participant</th>
+                <th class="text-center">Date de réponse</th>
+                <th class="text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for response in responses %}
+                <tr class="custom-table-row">
+                  <td class="text-center">{{ response.user.first_name }} {{ response.user.last_name }}</td>
+                  <td class="text-center">{{ response.created_at|date:"d/m/Y H:i" }}</td>
+                  <td class="text-center">
+                    <a href="{% url 'response_detail' response.pk %}" class="btn custom-btn btn-info btn-sm rounded-pill">
+                      <i class="fas fa-eye"></i> Voir les réponses
+                    </a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="alert alert-info text-center">
+          Aucune réponse n'a encore été enregistrée pour ce sondage.
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Styles ultra-premium -->
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+  @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css');
+
+  /* Fond général */
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #f6f9fc, #e9eff5);
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+  }
+
+  /* Carte principale */
+  .custom-card {
+    border-radius: 20px;
+    overflow: hidden;
+    animation: fadeInUp 0.8s ease-out;
+  }
+
+  /* En-tête de la carte */
+  .custom-card-header {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    padding: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  .custom-card-header h2 {
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+  .custom-card-header p {
+    font-size: 1rem;
+    opacity: 0.9;
+  }
+
+  .card-body {
+    padding: 2rem;
+  }
+
+  /* Tableaux ultra-modernes */
+  .custom-table thead th {
+    background: #f0f2f5;
+    font-weight: 600;
+    padding: 1rem;
+    border-bottom: 2px solid #dfe4ea;
+  }
+  .custom-table tbody td {
+    padding: 1rem;
+    vertical-align: middle;
+  }
+  .custom-table-row {
+    transition: all 0.3s ease;
+  }
+  .custom-table-row:hover {
+    background: #f9fafb;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+
+  /* Bouton d'action premium */
+  .custom-btn {
+    background: linear-gradient(135deg, #36d1dc, #5b86e5);
+    border: none;
+    padding: 0.5rem 1rem;
+    font-weight: 600;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .custom-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 14px rgba(53, 153, 255, 0.4);
+  }
+  .custom-btn:active {
+    transform: translateY(0);
+  }
+  .custom-btn i.fas {
+    margin-right: 5px;
+  }
+
+  /* Alert */
+  .alert {
+    font-size: 1.2rem;
+    border-radius: 10px;
+    padding: 1rem;
+    margin-top: 1rem;
+  }
+
+  /* Animation d'apparition */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Adaptatif pour mobile */
+  @media (max-width: 768px) {
+    .custom-card-header h2 {
+      font-size: 1.5rem;
+    }
+    .custom-card-header p {
+      font-size: 0.9rem;
+    }
+    .custom-btn {
+      font-size: 0.9rem;
+      padding: 0.4rem 0.8rem;
+    }
+  }
+</style>
+{% endblock %}

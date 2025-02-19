@@ -1,0 +1,79 @@
+{% extends 'survey/base.html' %}
+
+{% block title %}Supprimer le Sondage{% endblock %}
+
+{% block content %}
+<!-- Section principale avec fond doux -->
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <!-- Card avec une présentation épurée et élégante -->
+            <div class="card border-0 shadow-sm rounded-lg">
+                <div class="card-header text-center bg-danger text-white">
+                    <h4 class="font-weight-bold">Confirmer la Suppression</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Message de confirmation -->
+                    <p class="text-center">Êtes-vous sûr de vouloir supprimer le sondage <strong>{{ survey.title }}</strong> ? Cette action est irréversible.</p>
+                    
+                    <!-- Formulaire de suppression -->
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-center">
+                            <button type="submit" class="btn btn-danger btn-lg w-100 mb-2">
+                                Supprimer le Sondage
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Bouton d'annulation -->
+                    <div class="d-flex justify-content-center">
+                        <a href="{% url 'liste' %}" class="btn btn-secondary btn-lg w-100">
+                            Annuler
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Personnalisation du style pour une interface soignée -->
+<style>
+    body {
+        background-color: #e1f5fe; /* Bleu clair pastel */
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .card-header {
+        background-color: #e74c3c;
+        color: white;
+    }
+
+    .card-body {
+        background-color: #ffffff;
+        color: #333;
+        padding: 30px;
+        border-radius: 8px;
+    }
+
+    .btn {
+        font-size: 1.1rem;
+        font-weight: bold;
+        border-radius: 50px;
+    }
+
+    .btn-danger:hover {
+        background-color: #c0392b;
+    }
+
+    .btn-secondary:hover {
+        background-color: #bdc3c7;
+    }
+
+    .card-body p {
+        font-size: 1rem;
+        color: #666;
+    }
+</style>
+{% endblock %}

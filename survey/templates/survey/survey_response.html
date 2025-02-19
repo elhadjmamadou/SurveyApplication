@@ -1,0 +1,122 @@
+{% extends 'survey/base.html' %}
+
+{% block nav %}
+{% include "survey/nav.html" %}
+{% endblock nav %}
+
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-0 rounded-lg">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="mb-0">{{ survey.title }}</h2>
+                    <p class="mb-0">{{ survey.description }}</p>
+                </div>
+                
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        {% for question in questions %}
+                            <div class="question-container mb-4">
+                                <h4 class="mb-3">{{ forloop.counter }}. {{ question.text }}</h4>
+                                
+                                {% if question.question_type == 'text' %}
+                                    <div class="form-group">
+                                        <textarea name="question_{{ question.id }}" 
+                                                  class="form-control" 
+                                                  rows="3" 
+                                                  required></textarea>
+                                    </div>
+
+                                {% elif question.question_type == 'single_choice' %}
+                                    <div class="form-group">
+                                        {% for choice in question.choices.all %}
+                                            <div class="custom-control custom-radio">
+                                                <input type="radio" 
+                                                       id="choice_{{ choice.id }}" 
+                                                       name="question_{{ question.id }}" 
+                                                       value="{{ choice.id }}" 
+                                                       class="custom-control-input"
+                                                       required>
+                                                <label class="custom-control-label" 
+                                                       for="choice_{{ choice.id }}">
+                                                    {{ choice.text }}
+                                                </label>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+
+                                {% elif question.question_type == 'multiple_choice' %}
+                                    <div class="form-group">
+                                        {% for choice in question.choices.all %}
+                                            <div class="custom-control custom-checkbox">
+                                                <input type="checkbox" 
+                                                       id="choice_{{ choice.id }}" 
+                                                       name="question_{{ question.id }}" 
+                                                       value="{{ choice.id }}" 
+                                                       class="custom-control-input">
+                                                <label class="custom-control-label" 
+                                                       for="choice_{{ choice.id }}">
+                                                    {{ choice.text }}
+                                                </label>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg px-5">
+                                Soumettre mes réponses
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .question-container {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+
+    .custom-control {
+        margin-bottom: 10px;
+    }
+
+    .card-header {
+        padding: 20px;
+    }
+
+    .btn-primary {
+        font-size: 1.1rem;
+        padding: 12px 30px;
+        border-radius: 30px;
+    }
+
+    .alert {
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block footer %}
+{% include "survey/footer.html" %}
+{% endblock footer %}

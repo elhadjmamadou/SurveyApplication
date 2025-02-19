@@ -1,0 +1,102 @@
+{% extends "survey/base.html" %}
+
+{% block title %} Acceuil {% endblock title %}
+
+{% block nav %}
+{% include "survey/nav.html" %}
+{% endblock nav %}
+
+{% block hero %}
+<section class="py-5 text-center bg-primary text-white">
+    <div class="container">
+        <h1 class="display-4">Bienvenue chez EMD Sondage</h1>
+        <p class="lead">Explorez et participez à diverses Sondage créées par notre incroyable communauté !</p>
+        <a href="{% url "create_survey" %}" class="btn btn-outline-light btn-lg">Commencer Un nouveau sondage</a>
+    </div>
+</section>
+{% endblock hero %}
+
+{% block content %}
+<!-- Surveys List Section with a dark background -->
+<section class="py-5" style="background-color: #1a1a1a;">
+    <div class="container">
+        <h2 class="text-center mb-5 text-light">Dernières Sondage</h2>
+        <div class="row">
+            {% for survey in surveys %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100 shadow-lg" style="border-radius: 15px; overflow: hidden;">
+                    <!-- Card content with dark theme -->
+                    <div class="card-body" style="background-color: #2c2c2c; color: white;">
+                        <h5 class="card-title">{{ survey.title }}</h5>
+                        <p class="card-text">{{ survey.description|truncatewords:20 }}</p>
+                    </div>
+                    <!-- Survey details -->
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item" style="background-color: #333; color: #ccc;">Date de creation : {{ survey.start_date }}</li>
+                        <li class="list-group-item" style="background-color: #333; color: #ccc;">Fin du sondage : {{ survey.end_date }}</li>
+                        <li class="list-group-item" style="background-color: #333; color: #ccc;">Creer par : {{ survey.creator.first_name }} {{ survey.creator.last_name }}</li>
+                    </ul>
+                    <!-- Footer with buttons -->
+                    <div class="card-footer text-center" style="background-color: #444;">
+                        <a href="{% url "survey_respond" survey.id %}" class="btn btn-primary" style="background-color: #f39c12; border: none;">Participate</a>
+                        <!-- Buttons for Edit and Delete -->
+                        {% if survey.creator == request.user %}
+                        <a href="{% url "edit_survey" survey.id %}" class="btn btn-warning mx-2">Editer</a>
+                        <a href="{% url "delete_survey" survey.id %}" class="btn btn-danger">Supprimer</a>
+                        {% endif %}
+                        <a href="{% url "survey_detail" survey.id %}" class="btn btn-warning mx-2">Detail</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Optional CSS Styles -->
+<style>
+    h2 {
+        font-family: 'Roboto', sans-serif;
+        letter-spacing: 2px;
+    }
+    .card:hover {
+        transform: translateY(-10px);
+        transition: transform 0.3s ease;
+    }
+    .card-title {
+        font-weight: bold;
+        font-size: 1.25rem;
+    }
+    .card-text {
+        font-size: 0.95rem;
+        color: #ddd;
+    }
+    .card-footer .btn {
+        padding: 10px 15px;
+        font-weight: 600;
+    }
+    .btn-primary:hover {
+        background-color: #e67e22;
+        transition: background-color 0.3s ease;
+    }
+    .btn-warning {
+        background-color: #f1c40f;
+        border: none;
+    }
+    .btn-warning:hover {
+        background-color: #d4ac0d;
+    }
+    .btn-danger {
+        background-color: #e74c3c;
+        border: none;
+    }
+    .btn-danger:hover {
+        background-color: #c0392b;
+    }
+</style>
+
+{% endblock content %}
+
+{% block footer %}
+{% include "survey/footer.html" %}
+{% endblock footer %}

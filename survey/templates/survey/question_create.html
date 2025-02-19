@@ -1,0 +1,358 @@
+{% extends 'survey/base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-0 rounded-lg">
+                <div class="card-header bg-primary text-white text-center">
+                    <h2 class="font-weight-bold">Ajouter des Questions au Sondage : {{ survey.title }}</h2>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div id="formset-container">
+                            {{ formset.management_form }}
+                            {% for form in formset %}
+                                <div class="form-row mb-4 question-form">
+                                    <div class="col-12 mb-3">
+                                        <label for="id_form-${index}-text">Question:</label>
+                                        {{ form.text }}
+                                    </div>
+                                    <div class="col-12 mb-3">
+                                        <label for="id_form-${index}-question_type">Type de Question:</label>
+                                        {{ form.question_type }}
+                                    </div>
+                                    <div class="col-12 choices-container" style="display: none;">
+                                        <div class="choices-list">
+                                            <h4>Options de réponse</h4>
+                                            <div class="choice-inputs">
+                                                <div class="input-group mb-2">
+                                                    <input type="text" class="form-control choice-input" 
+                                                           name="form-${index}-choice-0" placeholder="Option de réponse">
+                                                    <div class="input-group-append">
+                                                        <button type="button" class="btn btn-danger remove-choice">
+                                                            <i class="fas fa-times"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <button type="button" class="btn btn-secondary add-choice">
+                                                Ajouter une option
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="text-center mt-4">
+                            <button type="button" id="add-question" class="btn btn-secondary btn-lg px-5">
+                                Ajouter une Question
+                            </button>
+                            <button type="submit" class="btn btn-primary btn-lg px-5 mt-3">
+                                Sauvegarder les Questions
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const formsetContainer = document.getElementById('formset-container');
+    const addQuestionButton = document.getElementById('add-question');
+    const totalFormsInput = document.querySelector('input[name="form-TOTAL_FORMS"]');
+    let formIndex = formsetContainer.querySelectorAll('.question-form').length;
+
+    // Gérer l'affichage initial des conteneurs de choix
+    document.querySelectorAll('.question-form select').forEach(select => {
+        handleQuestionTypeChange(select);
+    });
+
+    // Fonction pour gérer le changement de type de question
+    function handleQuestionTypeChange(select) {
+        const questionForm = select.closest('.question-form');
+        const choicesContainer = questionForm.querySelector('.choices-container');
+        
+        if (select.value === 'single_choice' || select.value === 'multiple_choice') {
+            choicesContainer.style.display = 'block';
+        } else {
+            choicesContainer.style.display = 'none';
+        }
+    }
+
+    // Ajouter un nouveau choix
+    function addChoiceInput(choicesList, index, choiceIndex) {
+        const newChoice = `
+            <div class="input-group mb-2">
+                <input type="text" class="form-control choice-input" 
+                       name="form-${index}-choice-${choiceIndex}" 
+                       placeholder="Option de réponse">
+                <div class="input-group-append">
+                    <button type="button" class="btn btn-danger remove-choice">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+        choicesList.querySelector('.choice-inputs').insertAdjacentHTML('beforeend', newChoice);
+    }
+
+    // Ajouter un nouveau formulaire de question
+    addQuestionButton.addEventListener('click', function() {
+        const newForm = `
+            <div class="form-row mb-4 question-form">
+                <div class="col-12 mb-3">
+                    <label for="id_form-${formIndex}-text">Question:</label>
+                    <input type="text" name="form-${formIndex}-text" maxlength="500" 
+                           class="form-control" id="id_form-${formIndex}-text" required>
+                </div>
+                <div class="col-12 mb-3">
+                    <label for="id_form-${formIndex}-question_type">Type de Question:</label>
+                    <select name="form-${formIndex}-question_type" class="form-control" 
+                            id="id_form-${formIndex}-question_type" required>
+                        <option value="text">Réponse texte</option>
+                        <option value="single_choice">Réponse unique (choix multiple)</option>
+                        <option value="multiple_choice">Réponse multiple (cases à cocher)</option>
+                    </select>
+                </div>
+                <div class="col-12 choices-container" style="display: none;">
+                    <div class="choices-list">
+                        <h4>Options de réponse</h4>
+                        <div class="choice-inputs">
+                            <div class="input-group mb-2">
+                                <input type="text" class="form-control choice-input" 
+                                       name="form-${formIndex}-choice-0" placeholder="Option de réponse">
+                                <div class="input-group-append">
+                                    <button type="button" class="btn btn-danger remove-choice">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-secondary add-choice">
+                            Ajouter une option
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        formsetContainer.insertAdjacentHTML('beforeend', newForm);
+        totalFormsInput.value = ++formIndex;
+
+        // Ajouter les écouteurs d'événements pour le nouveau formulaire
+        const newQuestionForm = formsetContainer.lastElementChild;
+        const newSelect = newQuestionForm.querySelector('select');
+        
+        newSelect.addEventListener('change', function() {
+            handleQuestionTypeChange(this);
+        });
+
+        newQuestionForm.querySelector('.add-choice').addEventListener('click', function() {
+            const choicesList = this.closest('.choices-list');
+            const choiceIndex = choicesList.querySelectorAll('.choice-input').length;
+            const formIndex = parseInt(this.closest('.question-form').querySelector('input[type="text"]').name.split('-')[1]);
+            addChoiceInput(choicesList, formIndex, choiceIndex);
+        });
+    });
+
+    // Délégation d'événements pour les boutons de suppression de choix
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-choice') || 
+            e.target.parentElement.classList.contains('remove-choice')) {
+            const choiceDiv = e.target.closest('.input-group');
+            if (choiceDiv.parentElement.children.length > 1) {
+                choiceDiv.remove();
+            }
+        }
+    });
+
+    // Écouteurs d'événements pour les changements de type de question
+    document.addEventListener('change', function(e) {
+        if (e.target.name && e.target.name.includes('-question_type')) {
+            handleQuestionTypeChange(e.target);
+        }
+    });
+
+    // Écouteurs d'événements pour l'ajout de choix
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('add-choice')) {
+            const choicesList = e.target.closest('.choices-list');
+            const choiceIndex = choicesList.querySelectorAll('.choice-input').length;
+            const formIndex = parseInt(e.target.closest('.question-form').querySelector('input[type="text"]').name.split('-')[1]);
+            addChoiceInput(choicesList, formIndex, choiceIndex);
+        }
+    });
+});
+</script>
+
+<style>
+body {
+    background-color: #f4f7fc;
+    font-family: 'Arial', sans-serif;
+}
+
+.card-header {
+    background-color: #007bff;
+    color: white;
+    padding: 20px;
+}
+
+.card-body {
+    background-color: #ffffff;
+    padding: 30px;
+}
+
+.btn {
+    font-size: 1.1rem;
+    border-radius: 30px;
+    padding: 12px 30px;
+}
+
+.btn-danger {
+    border-radius: 0 5px 5px 0;
+    padding: 8px 12px;
+}
+
+.choices-container {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+
+.input-group {
+    margin-bottom: 10px;
+}
+
+.choice-inputs {
+    margin-bottom: 15px;
+}
+</style>
+{% endblock content %}
+
+
+
+{% comment %} {% extends 'survey/base.html' %}
+
+{% block content %}
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow-lg border-0 rounded-lg">
+                    <div class="card-header bg-primary text-white text-center">
+                        <h2 class="font-weight-bold">Ajouter des Questions au Sondage : {{ survey.title }}</h2>
+                    </div>
+                    <div class="card-body">
+                        <form method="post">
+                            {% csrf_token %}
+                            <div id="formset-container">
+                                {{ formset.management_form }}
+                                {% for form in formset %}
+                                    <div class="form-row mb-4 question-form">
+                                        <div class="col">
+                                            {{ form.text.label_tag }} {{ form.text }}
+                                        </div>
+                                        <div class="col">
+                                            {{ form.question_type.label_tag }} {{ form.question_type }}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="text-center">
+                                <button type="button" id="add-question" class="btn btn-secondary btn-lg px-5">
+                                    Ajouter une Question
+                                </button>
+                                <button type="submit" class="btn btn-primary btn-lg px-5 mt-3">
+                                    Sauvegarder les Questions
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Style personnalisé pour l'apparence -->
+    <style>
+        body {
+            background-color: #f4f7fc;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .card-header {
+            background-color: #007bff;
+            color: white;
+            padding: 20px;
+        }
+
+        .card-body {
+            background-color: #ffffff;
+            padding: 30px;
+        }
+
+        .btn {
+            font-size: 1.1rem;
+            border-radius: 30px;
+            padding: 12px 30px;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
+            transition: background-color 0.3s ease;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-control {
+            padding: 15px;
+            font-size: 1rem;
+        }
+    </style>
+
+    <!-- Script pour ajouter dynamiquement des formulaires -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            let formsetContainer = document.getElementById('formset-container');
+            let addQuestionButton = document.getElementById('add-question');
+            let totalFormsInput = document.querySelector('input[name="form-TOTAL_FORMS"]');
+            let formIndex = formsetContainer.querySelectorAll('.question-form').length;
+
+            addQuestionButton.addEventListener('click', function() {
+                // Créer un nouveau formulaire en fonction de l'index
+                let newForm = `
+                    <div class="form-row mb-4 question-form">
+                        <div class="col">
+                            <label for="id_form-${formIndex}-text">Texte de la Question:</label>
+                            <input type="text" name="form-${formIndex}-text" maxlength="200" class="form-control" id="id_form-${formIndex}-text">
+                        </div>
+                        <div class="col">
+                            <label for="id_form-${formIndex}-question_type">Type de Question:</label>
+                            <select name="form-${formIndex}-question_type" class="form-control" id="id_form-${formIndex}-question_type">
+                                <option value="text">Texte</option>
+                                <option value="multiple_choice">Choix multiple</option>
+                                <option value="checkbox">Case à cocher</option>
+                                <!-- Ajouter d'autres types de questions ici si nécessaire -->
+                            </select>
+                        </div>
+                    </div>
+                `;
+
+                // Ajouter le nouveau formulaire au container
+                formsetContainer.insertAdjacentHTML('beforeend', newForm);
+                
+                // Mettre à jour le total des formulaires
+                totalFormsInput.value = ++formIndex;
+            });
+        });
+    </script>
+{% endblock content %} {% endcomment %}
