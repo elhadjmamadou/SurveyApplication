@@ -1,0 +1,17 @@
+[flake8]
+# Taille maximale d'une ligne
+max-line-length = 120
+
+# Ignorer certaines erreurs (exemple : E501 pour les lignes trop longues, si nécessaire)
+ignore = E501, W503
+
+# Dossier à exclure (par exemple, migrations de Django et fichiers virtuels)
+exclude =
+    .git,
+    __pycache__,
+    migrations,
+    env,
+    venv
+
+# Optionnel : Afficher les codes d'erreurs dans les messages
+show-source = True
