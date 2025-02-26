@@ -51,8 +51,8 @@ jobs:
           python-version: '3.12'
       - name: Install dependencies
         run: make install_dev
-      # - name: Run tests
-      #   run: make test
+      - name: Run tests
+        run: make test
 
   # build:
   #   name: Build & Push
