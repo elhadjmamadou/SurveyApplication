@@ -1,121 +1,501 @@
 {% extends 'survey/base.html' %}
 
+{% block title %}Répondre au sondage{% endblock title %}
+
 {% block nav %}
 {% include "survey/nav.html" %}
 {% endblock nav %}
 
+{% block extra_css %}
+<style>
+    /* Survey Response Page Styles */
+    .survey-response-section {
+        padding: 80px 0;
+        background-color: #f9fafb;
+        min-height: 100vh;
+        position: relative;
+    }
+    
+    .survey-header {
+        position: relative;
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        border-radius: 16px 16px 0 0;
+        padding: 30px;
+        color: white;
+        overflow: hidden;
+    }
+    
+    .survey-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80') no-repeat center center;
+        background-size: cover;
+        opacity: 0.1;
+        z-index: 0;
+    }
+    
+    .survey-header-content {
+        position: relative;
+        z-index: 1;
+    }
+    
+    .survey-title {
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    
+    .survey-description {
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+    
+    .survey-card {
+        border: none;
+        border-radius: 16px;
+        box-shadow: var(--card-shadow);
+        overflow: hidden;
+        background-color: var(--card-bg);
+    }
+    
+    .survey-body {
+        padding: 40px;
+    }
+    
+    .question-container {
+        background-color: rgba(var(--primary-color-rgb), 0.03);
+        padding: 30px;
+        border-radius: 12px;
+        margin-bottom: 30px;
+        border-left: 4px solid var(--primary-color);
+        transition: all 0.3s ease;
+    }
+    
+    .question-container:hover {
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        transform: translateY(-5px);
+    }
+    
+    .question-number {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        background-color: var(--primary-color);
+        color: white;
+        border-radius: 50%;
+        font-weight: 600;
+        margin-right: 10px;
+        font-size: 1rem;
+    }
+    
+    .question-text {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: var(--dark-color);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+    }
+    
+    .form-control {
+        border: 2px solid rgba(var(--primary-color-rgb), 0.2);
+        border-radius: 8px;
+        padding: 12px 15px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.25rem rgba(var(--primary-color-rgb), 0.25);
+    }
+    
+    textarea.form-control {
+        min-height: 120px;
+        resize: vertical;
+    }
+    
+    /* Custom Radio & Checkbox Styles */
+    .custom-control {
+        margin-bottom: 15px;
+        position: relative;
+        padding-left: 0;
+    }
+    
+    .choice-option {
+        display: block;
+        position: relative;
+        padding: 15px 15px 15px 50px;
+        background-color: white;
+        border: 2px solid rgba(var(--primary-color-rgb), 0.1);
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 1.05rem;
+        user-select: none;
+        transition: all 0.3s ease;
+    }
+    
+    .choice-option:hover {
+        border-color: rgba(var(--primary-color-rgb), 0.3);
+        background-color: rgba(var(--primary-color-rgb), 0.02);
+    }
+    
+    .choice-radio, .choice-checkbox {
+        position: absolute;
+        opacity: 0;
+        cursor: pointer;
+        height: 0;
+        width: 0;
+    }
+    
+    .radio-checkmark, .checkbox-checkmark {
+        position: absolute;
+        top: 50%;
+        left: 15px;
+        transform: translateY(-50%);
+        height: 24px;
+        width: 24px;
+        background-color: #fff;
+        border: 2px solid rgba(var(--primary-color-rgb), 0.3);
+        transition: all 0.2s ease;
+    }
+    
+    .radio-checkmark {
+        border-radius: 50%;
+    }
+    
+    .checkbox-checkmark {
+        border-radius: 4px;
+    }
+    
+    .choice-radio:checked ~ .choice-option .radio-checkmark,
+    .choice-checkbox:checked ~ .choice-option .checkbox-checkmark {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+    
+    .radio-checkmark:after,
+    .checkbox-checkmark:after {
+        content: "";
+        position: absolute;
+        display: none;
+    }
+    
+    .choice-radio:checked ~ .choice-option .radio-checkmark:after,
+    .choice-checkbox:checked ~ .choice-option .checkbox-checkmark:after {
+        display: block;
+    }
+    
+    .choice-option .radio-checkmark:after {
+        top: 7px;
+        left: 7px;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: white;
+    }
+    
+    .choice-option .checkbox-checkmark:after {
+        left: 9px;
+        top: 5px;
+        width: 6px;
+        height: 10px;
+        border: solid white;
+        border-width: 0 2px 2px 0;
+        transform: rotate(45deg);
+    }
+    
+    /* Submit Button */
+    .submit-container {
+        text-align: center;
+        margin-top: 40px;
+    }
+    
+    .btn-submit {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        color: white;
+        border: none;
+        border-radius: 50px;
+        padding: 15px 40px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        box-shadow: 0 10px 20px rgba(var(--primary-color-rgb), 0.3);
+        transition: all 0.3s ease;
+    }
+    
+    .btn-submit:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 25px rgba(var(--primary-color-rgb), 0.4);
+    }
+    
+    .btn-submit:active {
+        transform: translateY(-1px);
+    }
+    
+    /* Alert Messages */
+    .alert {
+        border-radius: 10px;
+        padding: 15px 20px;
+        margin-bottom: 25px;
+        border: none;
+        font-weight: 500;
+    }
+    
+    .alert-success {
+        background-color: rgba(16, 185, 129, 0.1);
+        color: #10b981;
+    }
+    
+    .alert-danger {
+        background-color: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+    }
+    
+    .alert-warning {
+        background-color: rgba(245, 158, 11, 0.1);
+        color: #f59e0b;
+    }
+    
+    .alert-info {
+        background-color: rgba(59, 130, 246, 0.1);
+        color: #3b82f6;
+    }
+    
+    /* Progress Bar */
+    .progress-container {
+        margin-bottom: 30px;
+    }
+    
+    .progress {
+        height: 8px;
+        border-radius: 4px;
+        background-color: rgba(var(--primary-color-rgb), 0.1);
+        overflow: hidden;
+    }
+    
+    .progress-bar {
+        background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+        border-radius: 4px;
+    }
+    
+    .progress-text {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 8px;
+        font-size: 0.9rem;
+        color: var(--gray-color);
+    }
+    
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+        .survey-body {
+            padding: 25px;
+        }
+        
+        .question-container {
+            padding: 20px;
+        }
+        
+        .survey-title {
+            font-size: 1.8rem;
+        }
+        
+        .question-text {
+            font-size: 1.2rem;
+        }
+    }
+    
+    /* Add a CSS variable for primary color RGB */
+    :root {
+        --primary-color-rgb: 99, 102, 241;
+    }
+</style>
+{% endblock extra_css %}
 
 {% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card shadow-lg border-0 rounded-lg">
-                <div class="card-header bg-primary text-white">
-                    <h2 class="mb-0">{{ survey.title }}</h2>
-                    <p class="mb-0">{{ survey.description }}</p>
-                </div>
-                
-                <div class="card-body">
-                    {% if messages %}
-                        {% for message in messages %}
-                            <div class="alert alert-{{ message.tags }}">
-                                {{ message }}
-                            </div>
-                        {% endfor %}
-                    {% endif %}
-
-                    <form method="post">
-                        {% csrf_token %}
-                        
-                        {% for question in questions %}
-                            <div class="question-container mb-4">
-                                <h4 class="mb-3">{{ forloop.counter }}. {{ question.text }}</h4>
-                                
-                                {% if question.question_type == 'text' %}
-                                    <div class="form-group">
-                                        <textarea name="question_{{ question.id }}" 
-                                                  class="form-control" 
-                                                  rows="3" 
-                                                  required></textarea>
-                                    </div>
-
-                                {% elif question.question_type == 'single_choice' %}
-                                    <div class="form-group">
-                                        {% for choice in question.choices.all %}
-                                            <div class="custom-control custom-radio">
-                                                <input type="radio" 
-                                                       id="choice_{{ choice.id }}" 
-                                                       name="question_{{ question.id }}" 
-                                                       value="{{ choice.id }}" 
-                                                       class="custom-control-input"
-                                                       required>
-                                                <label class="custom-control-label" 
-                                                       for="choice_{{ choice.id }}">
-                                                    {{ choice.text }}
-                                                </label>
-                                            </div>
-                                        {% endfor %}
-                                    </div>
-
-                                {% elif question.question_type == 'multiple_choice' %}
-                                    <div class="form-group">
-                                        {% for choice in question.choices.all %}
-                                            <div class="custom-control custom-checkbox">
-                                                <input type="checkbox" 
-                                                       id="choice_{{ choice.id }}" 
-                                                       name="question_{{ question.id }}" 
-                                                       value="{{ choice.id }}" 
-                                                       class="custom-control-input">
-                                                <label class="custom-control-label" 
-                                                       for="choice_{{ choice.id }}">
-                                                    {{ choice.text }}
-                                                </label>
-                                            </div>
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
-                            </div>
-                        {% endfor %}
-
-                        <div class="text-center mt-4">
-                            <button type="submit" class="btn btn-primary btn-lg px-5">
-                                Soumettre mes réponses
-                            </button>
+<section class="survey-response-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-md-10">
+                <div class="survey-card" data-aos="fade-up">
+                    <div class="survey-header">
+                        <div class="survey-header-content">
+                            <h1 class="survey-title">{{ survey.title }}</h1>
+                            <p class="survey-description">{{ survey.description }}</p>
                         </div>
-                    </form>
+                    </div>
+                    
+                    <div class="survey-body">
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="alert alert-{{ message.tags }}" role="alert">
+                                    <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'danger' %}fa-exclamation-circle{% elif message.tags == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %} me-2"></i>
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                        
+                        <div class="progress-container" data-aos="fade-up" data-aos-delay="100">
+                            <div class="progress">
+                                <div class="progress-bar" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" id="surveyProgress"></div>
+                            </div>
+                            <div class="progress-text">
+                                <span>Progression</span>
+                                <span id="progressText">0%</span>
+                            </div>
+                        </div>
+                        
+                        <form method="post" id="surveyForm">
+                            {% csrf_token %}
+                            
+                            {% for question in questions %}
+                                <div class="question-container" data-aos="fade-up" data-aos-delay="{{ forloop.counter|add:'150' }}">
+                                    <h4 class="question-text">
+                                        <span class="question-number">{{ forloop.counter }}</span>
+                                        {{ question.text }}
+                                    </h4>
+                                    
+                                    {% if question.question_type == 'text' %}
+                                        <div class="form-group">
+                                            <textarea name="question_{{ question.id }}" 
+                                                    class="form-control" 
+                                                    rows="3" 
+                                                    placeholder="Saisissez votre réponse ici..."
+                                                    required></textarea>
+                                        </div>
+                                    
+                                    {% elif question.question_type == 'single_choice' %}
+                                        <div class="form-group">
+                                            {% if question.has_choices %}
+                                                {% for choice in question.choices.all %}
+                                                    <div class="custom-control">
+                                                        <input type="radio" 
+                                                            id="choice_{{ choice.id }}" 
+                                                            name="question_{{ question.id }}" 
+                                                            value="{{ choice.id }}" 
+                                                            class="choice-radio"
+                                                            required>
+                                                        <label class="choice-option" for="choice_{{ choice.id }}">
+                                                            <span class="radio-checkmark"></span>
+                                                            {{ choice.text }}
+                                                        </label>
+                                                    </div>
+                                                {% endfor %}
+                                            {% else %}
+                                                <div class="alert alert-warning">
+                                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                                    Aucun choix disponible pour cette question.
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    
+                                    {% elif question.question_type == 'multiple_choice' %}
+                                        <div class="form-group">
+                                            {% if question.has_choices %}
+                                                {% for choice in question.choices.all %}
+                                                    <div class="custom-control">
+                                                        <input type="checkbox" 
+                                                            id="choice_{{ choice.id }}" 
+                                                            name="question_{{ question.id }}" 
+                                                            value="{{ choice.id }}" 
+                                                            class="choice-checkbox">
+                                                        <label class="choice-option" for="choice_{{ choice.id }}">
+                                                            <span class="checkbox-checkmark"></span>
+                                                            {{ choice.text }}
+                                                        </label>
+                                                    </div>
+                                                {% endfor %}
+                                            {% else %}
+                                                <div class="alert alert-warning">
+                                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                                    Aucun choix disponible pour cette question.
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            {% empty %}
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Ce sondage ne contient aucune question pour le moment.
+                                </div>
+                            {% endfor %}
+                            
+                            {% if questions %}
+                            <div class="submit-container" data-aos="fade-up" data-aos-delay="300">
+                                <button type="submit" class="btn btn-submit">
+                                    <i class="fas fa-paper-plane me-2"></i>Soumettre mes réponses
+                                </button>
+                            </div>
+                            {% endif %}
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+</section>
+{% endblock content %}
 
-<style>
-    .question-container {
-        background-color: #f8f9fa;
-        padding: 20px;
-        border-radius: 8px;
-        margin-bottom: 20px;
-    }
-
-    .custom-control {
-        margin-bottom: 10px;
-    }
-
-    .card-header {
-        padding: 20px;
-    }
-
-    .btn-primary {
-        font-size: 1.1rem;
-        padding: 12px 30px;
-        border-radius: 30px;
-    }
-
-    .alert {
-        margin-bottom: 20px;
-    }
-</style>
-{% endblock %}
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Function to update progress
+        function updateProgress() {
+            const form = document.getElementById('surveyForm');
+            const questions = document.querySelectorAll('.question-container');
+            
+            if (!questions.length) return; // Si pas de questions, ne rien faire
+            
+            let answeredCount = 0;
+            
+            questions.forEach(questionContainer => {
+                const inputs = questionContainer.querySelectorAll('input, textarea');
+                const isAnswered = Array.from(inputs).some(input => {
+                    if (input.type === 'radio' || input.type === 'checkbox') {
+                        return input.checked;
+                    } else if (input.type === 'textarea' || input.type === 'text') {
+                        return input.value.trim() !== '';
+                    }
+                    return false;
+                });
+                
+                if (isAnswered) {
+                    answeredCount++;
+                    questionContainer.classList.add('answered');
+                } else {
+                    questionContainer.classList.remove('answered');
+                }
+            });
+            
+            const progressPercent = Math.round((answeredCount / questions.length) * 100);
+            const progressBar = document.querySelector('.progress-bar');
+            const progressText = document.getElementById('progressText');
+            
+            if (progressBar && progressText) {
+                progressBar.style.width = progressPercent + '%';
+                progressText.textContent = progressPercent + '%';
+            }
+        }
+        
+        // Add event listeners to all inputs
+        document.querySelectorAll('input, textarea').forEach(input => {
+            input.addEventListener('change', updateProgress);
+            input.addEventListener('input', updateProgress);
+        });
+        
+        // Initial update
+        updateProgress();
+    });
+</script>
+{% endblock extra_js %}
 
 {% block footer %}
 {% include "survey/footer.html" %}

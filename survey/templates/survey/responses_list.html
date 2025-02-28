@@ -1,160 +1,224 @@
 {% extends 'survey/base.html' %}
 
-{% block content %}
-<div class="container py-5">
-  <div class="card custom-card shadow-lg border-0">
-    <div class="card-header text-white text-center custom-card-header">
-      <a class="fas fa-eye" href = "{% url "liste" %}" >Retoure</a>
-      <h2 class="mb-1">Réponses au sondage : {{ survey.title }}</h2>
-      <p class="mb-0">Total des réponses : {{ total_responses }}</p>
-    </div>
-    <div class="card-body">
-      {% if responses %}
-        <div class="table-responsive">
-          <table class="table table-hover align-middle custom-table">
-            <thead>
-              <tr>
-                <th class="text-center">Participant</th>
-                <th class="text-center">Date de réponse</th>
-                <th class="text-center">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for response in responses %}
-                <tr class="custom-table-row">
-                  <td class="text-center">{{ response.user.first_name }} {{ response.user.last_name }}</td>
-                  <td class="text-center">{{ response.created_at|date:"d/m/Y H:i" }}</td>
-                  <td class="text-center">
-                    <a href="{% url 'response_detail' response.pk %}" class="btn custom-btn btn-info btn-sm rounded-pill">
-                      <i class="fas fa-eye"></i> Voir les réponses
-                    </a>
-                  </td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      {% else %}
-        <div class="alert alert-info text-center">
-          Aucune réponse n'a encore été enregistrée pour ce sondage.
-        </div>
-      {% endif %}
-    </div>
-  </div>
-</div>
+{% block title %}Réponses au sondage{% endblock title %}
 
-<!-- Styles ultra-premium -->
+{% block nav %}
+{% include "survey/nav.html" %}
+{% endblock nav %}
+
+{% block extra_css %}
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
-  @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css');
-
-  /* Fond général */
-  body {
-    font-family: 'Poppins', sans-serif;
-    background: linear-gradient(135deg, #f6f9fc, #e9eff5);
-    margin: 0;
-    padding: 0;
-    min-height: 100vh;
-  }
-
-  /* Carte principale */
-  .custom-card {
-    border-radius: 20px;
-    overflow: hidden;
-    animation: fadeInUp 0.8s ease-out;
-  }
-
-  /* En-tête de la carte */
-  .custom-card-header {
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    padding: 2rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
-  .custom-card-header h2 {
-    font-size: 2rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-  }
-  .custom-card-header p {
-    font-size: 1rem;
-    opacity: 0.9;
-  }
-
-  .card-body {
-    padding: 2rem;
-  }
-
-  /* Tableaux ultra-modernes */
-  .custom-table thead th {
-    background: #f0f2f5;
-    font-weight: 600;
-    padding: 1rem;
-    border-bottom: 2px solid #dfe4ea;
-  }
-  .custom-table tbody td {
-    padding: 1rem;
-    vertical-align: middle;
-  }
-  .custom-table-row {
-    transition: all 0.3s ease;
-  }
-  .custom-table-row:hover {
-    background: #f9fafb;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  }
-
-  /* Bouton d'action premium */
-  .custom-btn {
-    background: linear-gradient(135deg, #36d1dc, #5b86e5);
-    border: none;
-    padding: 0.5rem 1rem;
-    font-weight: 600;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-  }
-  .custom-btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 14px rgba(53, 153, 255, 0.4);
-  }
-  .custom-btn:active {
-    transform: translateY(0);
-  }
-  .custom-btn i.fas {
-    margin-right: 5px;
-  }
-
-  /* Alert */
-  .alert {
-    font-size: 1.2rem;
-    border-radius: 10px;
-    padding: 1rem;
-    margin-top: 1rem;
-  }
-
-  /* Animation d'apparition */
-  @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
+    /* Responses List Page Styles */
+    .responses-section {
+        padding: 80px 0;
+        background-color: #f9fafb;
+        min-height: 100vh;
+        position: relative;
     }
-    to {
-      opacity: 1;
-      transform: translateY(0);
+    
+    .responses-card {
+        border: none;
+        border-radius: 16px;
+        overflow: hidden;
+        background-color: var(--card-bg);
+        box-shadow: var(--card-shadow);
     }
-  }
-
-  /* Adaptatif pour mobile */
-  @media (max-width: 768px) {
-    .custom-card-header h2 {
-      font-size: 1.5rem;
+    
+    .responses-header {
+        position: relative;
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        padding: 40px;
+        color: white;
+        overflow: hidden;
     }
-    .custom-card-header p {
-      font-size: 0.9rem;
+    
+    .responses-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80') no-repeat center center;
+        background-size: cover;
+        opacity: 0.1;
+        z-index: 0;
     }
-    .custom-btn {
-      font-size: 0.9rem;
-      padding: 0.4rem 0.8rem;
+    
+    .responses-header-content {
+        position: relative;
+        z-index: 1;
     }
-  }
+    
+    .responses-title {
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    
+    .responses-subtitle {
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+    
+    .responses-body {
+        padding: 40px;
+    }
+    
+    .table-container {
+        background-color: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+    
+    .responses-table {
+        margin-bottom: 0;
+    }
+    
+    .responses-table th {
+        background-color: rgba(var(--primary-color-rgb), 0.05);
+        font-weight: 600;
+        color: var(--dark-color);
+        padding: 15px;
+        border-bottom: 2px solid rgba(var(--primary-color-rgb), 0.1);
+    }
+    
+    .responses-table td {
+        padding: 15px;
+        vertical-align: middle;
+    }
+    
+    .responses-table tr {
+        transition: all 0.3s ease;
+    }
+    
+    .responses-table tr:hover {
+        background-color: rgba(var(--primary-color-rgb), 0.03);
+    }
+    
+    .btn-view {
+        background-color: var(--primary-color);
+        color: white;
+        border-radius: 50px;
+        padding: 8px 16px;
+        transition: all 0.3s ease;
+        border: none;
+    }
+    
+    .btn-view:hover {
+        background-color: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        color: white;
+    }
+    
+    .btn-back {
+        background-color: var(--gray-color);
+        color: white;
+        border-radius: 50px;
+        padding: 10px 20px;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        margin-top: 20px;
+        border: none;
+    }
+    
+    .btn-back i {
+        margin-right: 8px;
+    }
+    
+    .btn-back:hover {
+        background-color: var(--dark-color);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        color: white;
+    }
+    
+    .empty-responses {
+        background-color: rgba(var(--primary-color-rgb), 0.03);
+        border-left: 4px solid var(--primary-color);
+        padding: 20px;
+        border-radius: 8px;
+        text-align: center;
+        color: var(--dark-color);
+    }
+    
+    .empty-responses i {
+        font-size: 3rem;
+        color: var(--primary-color);
+        opacity: 0.5;
+        margin-bottom: 15px;
+    }
 </style>
-{% endblock %}
+{% endblock extra_css %}
+
+{% block content %}
+<section class="responses-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="responses-card" data-aos="fade-up">
+                    <div class="responses-header">
+                        <div class="responses-header-content">
+                            <h1 class="responses-title">Réponses au sondage</h1>
+                            <p class="responses-subtitle">{{ survey.title }} - {{ total_responses }} réponse(s) reçue(s)</p>
+                        </div>
+                    </div>
+                    
+                    <div class="responses-body">
+                        {% if responses %}
+                            <div class="table-container" data-aos="fade-up" data-aos-delay="100">
+                                <table class="table responses-table">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-center">Participant</th>
+                                            <th class="text-center">Date de réponse</th>
+                                            <th class="text-center">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for response in responses %}
+                                            <tr>
+                                                <td class="text-center">{{ response.user.first_name }} {{ response.user.last_name }}</td>
+                                                <td class="text-center">{{ response.created_at|date:"d/m/Y H:i" }}</td>
+                                                <td class="text-center">
+                                                    <a href="{% url 'response_detail' response.pk %}" class="btn btn-view">
+                                                        <i class="fas fa-eye me-1"></i> Voir le détail
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                                <a href="{% url 'detail' survey.id %}" class="btn btn-outline-light ms-2">
+                                    <i class="fas fa-arrow-left me-2"></i>Retour
+                                </a>
+                            </div>
+                        {% else %}
+                            <div class="empty-responses" data-aos="fade-up" data-aos-delay="100">
+                                <i class="fas fa-inbox d-block"></i>
+                                <h4>Aucune réponse</h4>
+                                <p>Aucune réponse n'a encore été enregistrée pour ce sondage.</p>
+                            </div>
+                        {% endif %}
+                        
+                        <div class="text-center" data-aos="fade-up" data-aos-delay="200">
+                            <a href="{% url 'detail' survey.id %}" class="btn btn-back">
+                                <i class="fas fa-arrow-left"></i> Retour au sondage
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}
+
+{% block footer %}
+{% include "survey/footer.html" %}
+{% endblock footer %}

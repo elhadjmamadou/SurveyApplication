@@ -1,155 +1,227 @@
 {% extends 'survey/base.html' %}
 
-{% block content %}
-<div class="container py-5">
-  <div class="card custom-card shadow-lg border-0">
-    <div class="card-header text-white text-center custom-card-header py-4">
-      <h2 class="mb-1">Réponses de {{ response.user.first_name }} {{ response.user.last_name }}</h2>
-      <p class="mb-0">Sondage : {{ response.survey.title }}</p>
-    </div>
-    <div class="card-body">
-      {% for question, answers in answers_by_question.items %}
-      <div class="question-response mb-4">
-        <h4 class="question-text mb-3">{{ forloop.counter }}. {{ question.text }}</h4>
-        <div class="answer-content ml-4">
-          {% if question.question_type == 'text' %}
-          <div class="text-answer">
-            {{ answers.0.text_answer }}
-          </div>
-          {% elif question.question_type == 'single_choice' %}
-          <div class="choice-answer">
-            {{ answers.0.choice.text }}
-          </div>
-          {% elif question.question_type == 'multiple_choice' %}
-          <ul class="multiple-choices">
-            {% for answer in answers %}
-            <li>{{ answer.choice.text }}</li>
-            {% endfor %}
-          </ul>
-          {% endif %}
-        </div>
-      </div>
-      {% if not forloop.last %}
-      <hr class="my-4">
-      {% endif %}
-      {% endfor %}
-      <div class="text-center mt-4">
-        <a href="{% url 'survey_responses' response.survey.id %}" class="btn custom-btn btn-primary rounded-pill">
-          Retour à la liste des réponses
-        </a>
-      </div>
-    </div>
-  </div>
-</div>
+{% block title %}Détail de la réponse{% endblock title %}
 
-<!-- Styles ultra-premium -->
+{% block nav %}
+{% include "survey/nav.html" %}
+{% endblock nav %}
+
+{% block extra_css %}
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
-  body {
-    font-family: 'Poppins', sans-serif;
-    background: linear-gradient(135deg, #f6f9fc, #e9eff5);
-    margin: 0;
-    padding: 0;
-  }
-  .custom-card {
-    border-radius: 20px;
-    overflow: hidden;
-    animation: fadeInUp 0.8s ease-out;
-  }
-  .custom-card-header {
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    padding: 2rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
-  .custom-card-header h2 {
-    font-size: 2rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-  }
-  .custom-card-header p {
-    font-size: 1rem;
-    opacity: 0.9;
-  }
-  .card-body {
-    padding: 2rem;
-  }
-  .question-response {
-    background-color: #f8f9fa;
-    padding: 20px;
-    border-radius: 10px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-  }
-  .question-response:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  }
-  .question-text {
-    color: #2c3e50;
-    font-weight: 600;
-  }
-  .answer-content {
-    background-color: #ffffff;
-    padding: 15px;
-    border-radius: 5px;
-    border-left: 4px solid #007bff;
-  }
-  .text-answer, .choice-answer {
-    white-space: pre-wrap;
-    font-size: 1rem;
-    color: #333;
-  }
-  .multiple-choices {
-    list-style: none;
-    padding-left: 1rem;
-    margin: 0;
-  }
-  .multiple-choices li {
-    position: relative;
-    padding-left: 1.2rem;
-    margin-bottom: 5px;
-    color: #333;
-  }
-  .multiple-choices li:before {
-    content: "•";
-    position: absolute;
-    left: 0;
-    color: #007bff;
-  }
-  .custom-btn {
-    background: linear-gradient(135deg, #36d1dc, #5b86e5);
-    border: none;
-    padding: 0.75rem 1.5rem;
-    font-weight: 600;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-  }
-  .custom-btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 14px rgba(53, 153, 255, 0.4);
-  }
-  .custom-btn:active {
-    transform: translateY(0);
-  }
-  @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
+    /* Response Detail Page Styles */
+    .response-detail-section {
+        padding: 80px 0;
+        background-color: #f9fafb;
+        min-height: 100vh;
+        position: relative;
     }
-    to {
-      opacity: 1;
-      transform: translateY(0);
+    
+    .response-detail-card {
+        border: none;
+        border-radius: 16px;
+        overflow: hidden;
+        background-color: var(--card-bg);
+        box-shadow: var(--card-shadow);
     }
-  }
-  @media (max-width: 768px) {
-    .custom-card-header h2 {
-      font-size: 1.5rem;
+    
+    .response-header {
+        position: relative;
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        padding: 40px;
+        color: white;
+        overflow: hidden;
     }
-    .custom-card-header p {
-      font-size: 0.9rem;
+    
+    .response-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80') no-repeat center center;
+        background-size: cover;
+        opacity: 0.1;
+        z-index: 0;
     }
-    .custom-btn {
-      font-size: 0.9rem;
-      padding: 0.5rem 1rem;
+    
+    .response-header-content {
+        position: relative;
+        z-index: 1;
     }
-  }
+    
+    .response-title {
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    
+    .response-subtitle {
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+    
+    .response-body {
+        padding: 40px;
+    }
+    
+    .question-container {
+        background-color: rgba(var(--primary-color-rgb), 0.03);
+        padding: 30px;
+        border-radius: 12px;
+        margin-bottom: 30px;
+        border-left: 4px solid var(--primary-color);
+        transition: all 0.3s ease;
+    }
+    
+    .question-container:hover {
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        transform: translateY(-5px);
+    }
+    
+    .question-number {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        background-color: var(--primary-color);
+        color: white;
+        border-radius: 50%;
+        font-weight: 600;
+        margin-right: 10px;
+        font-size: 1rem;
+    }
+    
+    .question-text {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: var(--dark-color);
+        margin-bottom: 1.5rem;
+    }
+    
+    .answer-content {
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    }
+    
+    .text-answer {
+        white-space: pre-wrap;
+        color: var(--dark-color);
+        font-size: 1.1rem;
+    }
+    
+    .choice-answer {
+        color: var(--dark-color);
+        font-size: 1.1rem;
+        font-weight: 500;
+    }
+    
+    .multiple-choices {
+        list-style-type: none;
+        padding-left: 0;
+        margin-bottom: 0;
+    }
+    
+    .multiple-choices li {
+        padding: 8px 0;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        color: var(--dark-color);
+        font-size: 1.1rem;
+    }
+    
+    .multiple-choices li:last-child {
+        border-bottom: none;
+    }
+    
+    .multiple-choices li::before {
+        content: '\f00c';
+        font-family: 'Font Awesome 5 Free';
+        font-weight: 900;
+        margin-right: 10px;
+        color: var(--secondary-color);
+    }
+    
+    .btn-back {
+        background-color: var(--gray-color);
+        color: white;
+        border-radius: 50px;
+        padding: 10px 20px;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        margin-top: 20px;
+        border: none;
+    }
+    
+    .btn-back i {
+        margin-right: 8px;
+    }
+    
+    .btn-back:hover {
+        background-color: var(--dark-color);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        color: white;
+    }
 </style>
-{% endblock %}
+{% endblock extra_css %}
+
+{% block content %}
+<section class="response-detail-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="response-detail-card" data-aos="fade-up">
+                    <div class="response-header">
+                        <div class="response-header-content">
+                            <h1 class="response-title">Réponses de {{ response.user.first_name }} {{ response.user.last_name }}</h1>
+                            <p class="response-subtitle">Sondage : {{ response.survey.title }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="response-body">
+                        {% for question, answers in answers_by_question.items %}
+                            <div class="question-container" data-aos="fade-up" data-aos-delay="{{ forloop.counter|add:'100' }}">
+                                <h4 class="question-text">
+                                    <span class="question-number">{{ forloop.counter }}</span>
+                                    {{ question.text }}
+                                </h4>
+                                <div class="answer-content">
+                                    {% if question.question_type == 'text' %}
+                                        <div class="text-answer">
+                                            {{ answers.0.text_answer }}
+                                        </div>
+                                    {% elif question.question_type == 'single_choice' %}
+                                        <div class="choice-answer">
+                                            {{ answers.0.choice.text }}
+                                        </div>
+                                    {% elif question.question_type == 'multiple_choice' %}
+                                        <ul class="multiple-choices">
+                                            {% for answer in answers %}
+                                                <li>{{ answer.choice.text }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                        
+                        <div class="text-center" data-aos="fade-up" data-aos-delay="300">
+                            <a href="{% url 'survey_responses' response.survey.id %}" class="btn btn-back">
+                                <i class="fas fa-arrow-left"></i> Retour à la liste des réponses
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}
+
+{% block footer %}
+{% include "survey/footer.html" %}
+{% endblock footer %}

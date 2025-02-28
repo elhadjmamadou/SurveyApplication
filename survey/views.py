@@ -12,7 +12,6 @@ from django.contrib import messages
 from datetime import date
 
 
-
 class ListView(ListView):
     model = Survey
     template_name = "survey/liste.html"
@@ -21,14 +20,12 @@ class ListView(ListView):
 
 class EditSurveyView(LoginRequiredMixin,UpdateView):
     model = Survey
+    form_class = SurveyForm
     template_name = 'survey/edit_survey.html'
-    context_object_name = 'survey'
-    form_class = SurveyForm 
-    success_url = reverse_lazy('liste') 
-    
+    success_url = reverse_lazy('liste')
 
 
-class DeleteSurveyView(LoginRequiredMixin, DeleteView):
+class DeleteSurveyView(LoginRequiredMixin,DeleteView):
     model = Survey
     template_name = 'survey/delete_survey.html'
     context_object_name = 'survey'
@@ -42,162 +39,137 @@ class CreateSurvey(LoginRequiredMixin,CreateView):
     success_url = reverse_lazy('liste')
 
 
-class DetailSurvey(LoginRequiredMixin, DetailView):
+class DetailSurvey(DetailView):
     model = Survey
     template_name = "survey/survey_detail.html"
     context_object_name = 'survey'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['questions'] = self.object.questions.all()
+        context['questions'] = Question.objects.filter(survey=self.object)
         return context
 
-#
+
 class QuestionCreateView(LoginRequiredMixin, View):
     template_name = 'survey/question_create.html'
 
     def get(self, request, *args, **kwargs):
-        survey = get_object_or_404(Survey, pk=self.kwargs['survey_id'])
-        QuestionFormSet = modelformset_factory(Question, form=QuestionForm, extra=2)
-        formset = QuestionFormSet(queryset=Question.objects.none())
-        return render(request, self.template_name, {
-            'formset': formset,
-            'survey': survey
-        })
-
-    def post(self, request, *args, **kwargs):
-        survey = get_object_or_404(Survey, pk=self.kwargs['survey_id'])
-        QuestionFormSet = modelformset_factory(Question, form=QuestionForm, extra=2)
-        formset = QuestionFormSet(request.POST)
-
-        if formset.is_valid():
-            questions = formset.save(commit=False)
-            
-            # Parcourir toutes les données POST pour trouver les choix
-            for i, question in enumerate(questions):
-                question.survey = survey
-                question.save()
-                
-                # Si la question est à choix unique ou multiple, sauvegarder les choix
-                if question.question_type in [Question.SINGLE_CHOICE, Question.MULTIPLE_CHOICE]:
-                    choice_index = 0
-                    while True:
-                        choice_key = f'form-{i}-choice-{choice_index}'
-                        if choice_key not in request.POST:
-                            break
-                        
-                        choice_text = request.POST[choice_key].strip()
-                        if choice_text:  # Ne créer le choix que si le texte n'est pas vide
-                            Choice.objects.create(
-                                question=question,
-                                text=choice_text
-                            )
-                        choice_index += 1
-
-            return redirect(reverse_lazy('survey_detail', kwargs={'pk': survey.id}))
-            
-        return render(request, self.template_name, {
-            'formset': formset,
-            'survey': survey
-        })
-
-
-class SurveyResponseView(LoginRequiredMixin, View):
-    template_name = 'survey/survey_response.html'
-
-    def get(self, request, survey_id):
-        survey = get_object_or_404(Survey, pk=survey_id)
+        survey_id = kwargs.get('survey_id')
+        survey = get_object_or_404(Survey, id=survey_id)
         
-        # Vérifier si le sondage est actif
-        if not survey.is_active():
-            messages.error(request, "Ce sondage n'est pas actif actuellement.")
+        # Vérifier si l'utilisateur est le créateur du sondage
+        if survey.creator != request.user:
+            messages.error(request, "Vous n'avez pas l'autorisation de modifier ce sondage.")
             return redirect('liste')
         
-        # Vérifier si l'utilisateur a déjà répondu
-        existing_response = Response.objects.filter(
-            user=request.user,
-            survey=survey
-        ).first()
-        
-        if existing_response:
-            messages.info(request, "Vous avez déjà répondu à ce sondage.")
-            return redirect('liste')
-
+        form = QuestionForm()
         context = {
+            'form': form,
             'survey': survey,
-            'questions': survey.questions.all().prefetch_related('choices')
         }
         return render(request, self.template_name, context)
 
+    def post(self, request, *args, **kwargs):
+        survey_id = kwargs.get('survey_id')
+        survey = get_object_or_404(Survey, id=survey_id)
+        
+        # Vérifier si l'utilisateur est le créateur du sondage
+        if survey.creator != request.user:
+            messages.error(request, "Vous n'avez pas l'autorisation de modifier ce sondage.")
+            return redirect('liste')
+        
+        form = QuestionForm(request.POST)
+        if form.is_valid():
+            question = form.save(commit=False)
+            question.survey = survey
+            question.save()
+            
+            # Traiter les choix si c'est une question à choix
+            if question.question_type in ['single_choice', 'multiple_choice']:
+                choices_text = request.POST.getlist('choices')
+                for choice_text in choices_text:
+                    if choice_text.strip():  # Ne pas créer de choix vides
+                        Choice.objects.create(question=question, text=choice_text.strip())
+            
+            messages.success(request, "Question ajoutée avec succès!")
+            return redirect('detail', pk=survey_id)
+        
+        context = {
+            'form': form,
+            'survey': survey,
+        }
+        return render(request, self.template_name, context)
+
+
+class SurveyResponseView(View):
+    template_name = 'survey/survey_response.html'
+    
+    def get(self, request, survey_id):
+        survey = get_object_or_404(Survey, pk=survey_id)
+        questions = Question.objects.filter(survey=survey).prefetch_related('choices')
+        
+        # Vérifier si le sondage a des questions
+        if not questions.exists():
+            messages.warning(request, "Ce sondage ne contient aucune question.")
+        
+        context = {
+            'survey': survey,
+            'questions': questions,
+        }
+        return render(request, self.template_name, context)
+    
     def post(self, request, survey_id):
         survey = get_object_or_404(Survey, pk=survey_id)
+        questions = Question.objects.filter(survey=survey).prefetch_related('choices')
         
-        # Vérifications de sécurité
-        if not survey.is_active():
-            messages.error(request, "Ce sondage n'est pas actif actuellement.")
-            return redirect('liste')
+        # Créer une nouvelle réponse
+        response = Response.objects.create(
+            survey=survey,
+            respondent=request.user if request.user.is_authenticated else None
+        )
+        
+        # Traiter chaque question
+        for question in questions:
+            if question.question_type == 'text':
+                # Traiter les réponses textuelles
+                text_answer = request.POST.get(f'question_{question.id}', '').strip()
+                if text_answer:
+                    Answer.objects.create(
+                        response=response,
+                        question=question,
+                        text_answer=text_answer
+                    )
             
-        if Response.objects.filter(user=request.user, survey=survey).exists():
-            messages.error(request, "Vous avez déjà répondu à ce sondage.")
-            return redirect('liste')
-
-        try:
-            # Créer une nouvelle réponse
-            response = Response.objects.create(
-                user=request.user,
-                survey=survey
-            )
-
-            # Traiter chaque question
-            for question in survey.questions.all():
-                if question.question_type == 'text':
-                    answer_text = request.POST.get(f'question_{question.id}')
-                    if not answer_text:
-                        raise ValueError(f"La question '{question.text}' nécessite une réponse.")
-                    
-                    Answer.objects.create(
-                        response=response,
-                        question=question,
-                        text_answer=answer_text
-                    )
-                
-                elif question.question_type == 'single_choice':
-                    choice_id = request.POST.get(f'question_{question.id}')
-                    if not choice_id:
-                        raise ValueError(f"La question '{question.text}' nécessite une réponse.")
-                    
-                    choice = Choice.objects.get(pk=choice_id, question=question)
-                    Answer.objects.create(
-                        response=response,
-                        question=question,
-                        choice=choice
-                    )
-                
-                elif question.question_type == 'multiple_choice':
-                    choice_ids = request.POST.getlist(f'question_{question.id}')
-                    if not choice_ids:
-                        raise ValueError(f"La question '{question.text}' nécessite au moins une réponse.")
-                    
-                    for choice_id in choice_ids:
-                        choice = Choice.objects.get(pk=choice_id, question=question)
+            elif question.question_type == 'single_choice':
+                # Traiter les réponses à choix unique
+                choice_id = request.POST.get(f'question_{question.id}')
+                if choice_id:
+                    try:
+                        choice = Choice.objects.get(id=choice_id, question=question)
                         Answer.objects.create(
                             response=response,
                             question=question,
                             choice=choice
                         )
-
-            messages.success(request, "Merci d'avoir répondu au sondage!")
-            return redirect('liste')
-
-        except (ValueError, Choice.DoesNotExist) as e:
-            # En cas d'erreur, supprimer la réponse et afficher l'erreur
-            if 'response' in locals():
-                response.delete()
-            messages.error(request, str(e))
-            return render(request, self.template_name, {
-                'survey': survey,
-                'questions': survey.questions.all().prefetch_related('choices')
-            })
+                    except Choice.DoesNotExist:
+                        pass
+            
+            elif question.question_type == 'multiple_choice':
+                # Traiter les réponses à choix multiples
+                choice_ids = request.POST.getlist(f'question_{question.id}')
+                for choice_id in choice_ids:
+                    try:
+                        choice = Choice.objects.get(id=choice_id, question=question)
+                        Answer.objects.create(
+                            response=response,
+                            question=question,
+                            choice=choice
+                        )
+                    except Choice.DoesNotExist:
+                        pass
+        
+        messages.success(request, "Merci pour votre réponse au sondage!")
+        return redirect('liste')
 
 
 class SurveyResponsesListView(LoginRequiredMixin, ListView):
@@ -205,20 +177,23 @@ class SurveyResponsesListView(LoginRequiredMixin, ListView):
     template_name = 'survey/responses_list.html'
     context_object_name = 'responses'
     
-
     def get_queryset(self):
-        self.survey = get_object_or_404(Survey, pk=self.kwargs['survey_id'])
-        return Response.objects.filter(survey=self.survey).select_related('user')
-
+        survey_id = self.kwargs.get('survey_id')
+        survey = get_object_or_404(Survey, pk=survey_id)
+        
+        # Vérifier que l'utilisateur est le créateur du sondage
+        if survey.creator != self.request.user:
+            return Response.objects.none()
+        
+        return Response.objects.filter(survey=survey).order_by('-created_at')
+    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['survey'] = self.survey
-        # Calculer quelques statistiques
-        context['total_responses'] = self.get_queryset().count()
-        context['questions'] = self.survey.questions.all()
+        survey_id = self.kwargs.get('survey_id')
+        context['survey'] = get_object_or_404(Survey, pk=survey_id)
         return context
-    
-    
+
+
 class SurveyResponseDetailView(LoginRequiredMixin, DetailView):
     template_name = 'survey/response_detail.html'
     context_object_name = 'response'
@@ -226,6 +201,7 @@ class SurveyResponseDetailView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        
         # Organiser les réponses par question
         answers = self.object.answers.select_related('question', 'choice')
         answers_by_question = {}

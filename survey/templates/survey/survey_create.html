@@ -6,100 +6,328 @@
 {% include "survey/nav.html" %}
 {% endblock nav %}
 
-{% block content %}
-<!-- Section principale -->
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
-            <!-- Card de création de sondage -->
-            <div class="card shadow-lg border-0 rounded-lg">
-                <div class="card-header text-center bg-success text-white">
-                    <h4 class="font-weight-bold">Créer un Nouveau Sondage</h4>
-                </div>
-                <div class="card-body">
-                    <!-- Formulaire de création -->
-                    <form method="POST">
-                        {% csrf_token %}
-                        {% for field in form %}
-                            <div class="form-group mb-4">
-                                <label for="{{ field.id_for_label }}" class="font-weight-bold">{{ field.label }}</label>
-                                {{ field }}
-                                {% if field.errors %}
-                                    <div class="alert alert-danger mt-2">
-                                        {% for error in field.errors %}
-                                            <p>{{ error }}</p>
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
-                            </div>
-                        {% endfor %}
+{% block extra_css %}
+<style>
+    /* Survey Create Page Styles */
+    .survey-create-section {
+        padding: 80px 0;
+        background-color: #f9fafb;
+        min-height: 100vh;
+        position: relative;
+    }
+    
+    .survey-create-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 40%;
+        height: 100%;
+        background: url('https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80') no-repeat center center;
+        background-size: cover;
+        opacity: 0.05;
+        z-index: 0;
+    }
+    
+    .survey-create-card {
+        border: none;
+        border-radius: 16px;
+        overflow: hidden;
+        background-color: var(--card-bg);
+        box-shadow: var(--card-shadow);
+    }
+    
+    .survey-header {
+        position: relative;
+        background: linear-gradient(135deg, var(--secondary-color), #0ca678);
+        padding: 40px;
+        color: white;
+        overflow: hidden;
+    }
+    
+    .survey-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80') no-repeat center center;
+        background-size: cover;
+        opacity: 0.1;
+        z-index: 0;
+    }
+    
+    .survey-header-content {
+        position: relative;
+        z-index: 1;
+    }
+    
+    .survey-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+    
+    .survey-description {
+        font-size: 1.2rem;
+        opacity: 0.9;
+        margin-bottom: 0;
+    }
+    
+    .survey-body {
+        padding: 40px;
+    }
+    
+    .form-group {
+        margin-bottom: 25px;
+    }
+    
+    .form-label {
+        display: block;
+        margin-bottom: 10px;
+        font-weight: 600;
+        color: var(--dark-color);
+        font-size: 1.1rem;
+    }
+    
+    .form-control {
+        display: block;
+        width: 100%;
+        padding: 15px;
+        font-size: 1rem;
+        line-height: 1.5;
+        color: var(--dark-color);
+        background-color: #fff;
+        background-clip: padding-box;
+        border: 1px solid #ced4da;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus {
+        color: var(--dark-color);
+        background-color: #fff;
+        border-color: var(--secondary-color);
+        outline: 0;
+        box-shadow: 0 0 0 0.2rem rgba(16, 185, 129, 0.25);
+    }
+    
+    textarea.form-control {
+        height: auto;
+        min-height: 120px;
+        resize: vertical;
+    }
+    
+    .form-text {
+        display: block;
+        margin-top: 8px;
+        font-size: 0.875rem;
+        color: var(--gray-color);
+    }
+    
+    .alert-danger {
+        background-color: #fee2e2;
+        border-color: #fecaca;
+        color: #b91c1c;
+        border-radius: 8px;
+        padding: 12px 15px;
+        margin-top: 10px;
+        font-size: 0.9rem;
+    }
+    
+    .action-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-top: 2rem;
+    }
+    
+    .btn-action {
+        padding: 15px 30px;
+        border-radius: 50px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        font-size: 1.1rem;
+        flex: 1;
+    }
+    
+    .btn-action i {
+        margin-right: 8px;
+    }
+    
+    .btn-success {
+        background-color: var(--secondary-color);
+        color: white;
+        border: none;
+    }
+    
+    .btn-success:hover {
+        background-color: #0ca678;
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
+    }
+    
+    .btn-outline {
+        background-color: transparent;
+        border: 2px solid var(--gray-color);
+        color: var(--gray-color);
+    }
+    
+    .btn-outline:hover {
+        background-color: var(--gray-color);
+        color: white;
+        transform: translateY(-3px);
+    }
+    
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+        .survey-header {
+            padding: 30px;
+        }
+        
+        .survey-body {
+            padding: 25px;
+        }
+        
+        .survey-title {
+            font-size: 2rem;
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+        }
+        
+        .btn-action {
+            width: 100%;
+        }
+    }
+    
+    /* Animation for form elements */
+    .animate-form-group {
+        opacity: 0;
+        transform: translateY(20px);
+        animation: fadeInUp 0.5s forwards;
+    }
+    
+    @keyframes fadeInUp {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Staggered animation delay for form groups */
+    .form-group:nth-child(1) {
+        animation-delay: 0.1s;
+    }
+    
+    .form-group:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+    
+    .form-group:nth-child(3) {
+        animation-delay: 0.3s;
+    }
+    
+    .form-group:nth-child(4) {
+        animation-delay: 0.4s;
+    }
+    
+    .action-buttons {
+        opacity: 0;
+        transform: translateY(20px);
+        animation: fadeInUp 0.5s forwards;
+        animation-delay: 0.5s;
+    }
+</style>
+{% endblock extra_css %}
 
-                        <!-- Boutons de soumission -->
-                        <div class="d-flex justify-content-between">
-                            <button type="submit" class="btn btn-success btn-lg w-48">Créer le Sondage</button>
-                            <a href="{% url 'liste' %}" class="btn btn-secondary btn-lg w-48">Annuler</a>
+{% block content %}
+<section class="survey-create-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="survey-create-card" data-aos="fade-up">
+                    <div class="survey-header">
+                        <div class="survey-header-content">
+                            <h1 class="survey-title">Créer un Nouveau Sondage</h1>
+                            <p class="survey-description">Concevez votre sondage personnalisé en quelques étapes simples</p>
                         </div>
-                    </form>
+                    </div>
+                    
+                    <div class="survey-body">
+                        <form method="POST" class="survey-create-form">
+                            {% csrf_token %}
+                            
+                            {% for field in form %}
+                                <div class="form-group animate-form-group">
+                                    <label for="{{ field.id_for_label }}" class="form-label">
+                                        {% if field.name == 'title' %}
+                                            <i class="fas fa-heading me-2"></i>
+                                        {% elif field.name == 'description' %}
+                                            <i class="fas fa-align-left me-2"></i>
+                                        {% elif field.name == 'start_date' %}
+                                            <i class="far fa-calendar-alt me-2"></i>
+                                        {% elif field.name == 'end_date' %}
+                                            <i class="far fa-calendar-check me-2"></i>
+                                        {% endif %}
+                                        {{ field.label }}
+                                    </label>
+                                    
+                                    {{ field }}
+                                    
+                                    {% if field.help_text %}
+                                        <small class="form-text">{{ field.help_text }}</small>
+                                    {% endif %}
+                                    
+                                    {% if field.errors %}
+                                        <div class="alert alert-danger">
+                                            {% for error in field.errors %}
+                                                <p class="mb-0">{{ error }}</p>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                            
+                            <div class="action-buttons">
+                                <button type="submit" class="btn btn-success btn-action">
+                                    <i class="fas fa-plus-circle"></i>
+                                    Créer le Sondage
+                                </button>
+                                
+                                <a href="{% url 'liste' %}" class="btn btn-outline btn-action">
+                                    <i class="fas fa-times"></i>
+                                    Annuler
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Tips Card -->
+                <div class="card mt-4 border-0 shadow-sm" data-aos="fade-up" data-aos-delay="300">
+                    <div class="card-body">
+                        <h5 class="mb-3">
+                            <i class="fas fa-lightbulb text-warning me-2"></i>
+                            Conseils pour créer un bon sondage
+                        </h5>
+                        <ul class="mb-0">
+                            <li class="mb-2">Donnez un titre clair et concis à votre sondage</li>
+                            <li class="mb-2">Fournissez une description détaillée pour informer les participants</li>
+                            <li class="mb-2">Définissez une période de temps raisonnable pour collecter les réponses</li>
+                            <li>Après la création, vous pourrez ajouter des questions à votre sondage</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
-
-<!-- Style personnalisé pour améliorer l'apparence -->
-<style>
-    body {
-        background-color: #f0f4f8; /* Fond clair et moderne */
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-
-    .card-header {
-        background-color: #28a745; /* Vert vif pour indiquer l'action positive */
-        color: white;
-    }
-
-    .card-body {
-        background-color: #ffffff;
-        color: #333;
-        padding: 30px;
-        border-radius: 8px;
-    }
-
-    .form-group input, .form-group textarea, .form-group select {
-        border-radius: 5px;
-        border: 1px solid #ced4da;
-        padding: 10px;
-        width: 100%;
-        font-size: 1rem;
-    }
-
-    .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
-        border-color: #28a745;
-        outline: none;
-    }
-
-    .btn {
-        font-size: 1.1rem;
-        font-weight: bold;
-        border-radius: 50px;
-        padding: 12px 24px;
-    }
-
-    .btn:hover {
-        transform: translateY(-3px);
-        transition: all 0.3s ease;
-    }
-
-    .btn:active {
-        transform: translateY(1px);
-    }
-
-    .alert-danger {
-        background-color: #f8d7da;
-        border-color: #f5c6cb;
-    }
-</style>
-
+</section>
 {% endblock content %}
 
 {% block footer %}

@@ -1,88 +1,214 @@
 <!-- footer.html -->
- {% load static %}
-<footer class="bg-dark text-light py-4">
+{% load static %}
+<footer class="footer-section py-5">
     <div class="container">
-        <div class="row">
+        <div class="row g-4">
             <!-- Section About the App -->
-            <div class="col-md-4">
-                <h5>About SurveyMaster</h5>
-                <p>
-                    SurveyMaster is your go-to platform for creating and participating in insightful surveys.
-                    Empower your decisions with real data and make a difference by contributing to various polls.
-                </p>
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                <div class="footer-widget">
+                    <h4 class="widget-title">À propos d'EMD Sondage</h4>
+                    <p class="widget-text">
+                        EMD Sondage est votre plateforme de référence pour créer et participer à des sondages pertinents.
+                        Prenez des décisions éclairées grâce à des données réelles et contribuez à divers sondages.
+                    </p>
+                    <div class="app-badges mt-4">
+                        <a href="#" class="badge-item me-2">
+                            <img src="https://img.icons8.com/color/48/000000/google-play.png" alt="Google Play" width="140">
+                        </a>
+                        <a href="#" class="badge-item">
+                            <img src="https://img.icons8.com/color/48/000000/app-store.png" alt="App Store" width="140">
+                        </a>
+                    </div>
+                </div>
             </div>
 
             <!-- Quick Links -->
-            <div class="col-md-2">
-                <h5>Quick Links</h5>
-                <ul class="list-unstyled">
-                    <li><a href="#" class="text-light">Home</a></li>
-                    <li><a href="#" class="text-light">Surveys</a></li>
-                    <li><a href="#" class="text-light">Create Survey</a></li>
-                    <li><a href="#" class="text-light">Contact Us</a></li>
-                </ul>
+            <div class="col-lg-2 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                <div class="footer-widget">
+                    <h4 class="widget-title">Liens rapides</h4>
+                    <ul class="widget-links">
+                        <li><a href="{% url 'liste' %}"><i class="fas fa-chevron-right me-2"></i>Accueil</a></li>
+                        <li><a href="{% url 'create_survey' %}"><i class="fas fa-chevron-right me-2"></i>Créer un sondage</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right me-2"></i>Mon compte</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right me-2"></i>Nous contacter</a></li>
+                    </ul>
+                </div>
             </div>
 
             <!-- Resources -->
-            <div class="col-md-2">
-                <h5>Resources</h5>
-                <ul class="list-unstyled">
-                    <li><a href="#" class="text-light">Help Center</a></li>
-                    <li><a href="#" class="text-light">Privacy Policy</a></li>
-                    <li><a href="#" class="text-light">Terms of Service</a></li>
-                    <li><a href="#" class="text-light">FAQ</a></li>
-                </ul>
+            <div class="col-lg-2 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                <div class="footer-widget">
+                    <h4 class="widget-title">Ressources</h4>
+                    <ul class="widget-links">
+                        <li><a href="#"><i class="fas fa-chevron-right me-2"></i>Centre d'aide</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right me-2"></i>Politique de confidentialité</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right me-2"></i>Conditions d'utilisation</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right me-2"></i>FAQ</a></li>
+                    </ul>
+                </div>
             </div>
 
-            <!-- Social Media Links -->
-            <div class="col-md-4">
-                <h5>Connect With Us</h5>
-                <ul class="list-inline">
-                    <li class="list-inline-item">
-                        <a href="#" class="text-light">
-                            <i class="fab fa-facebook fa-2x"></i>
-                        </a>
-                    </li>
-                    <li class="list-inline-item">
-                        <a href="#" class="text-light">
-                            <i class="fab fa-twitter fa-2x"></i>
-                        </a>
-                    </li>
-                    <li class="list-inline-item">
-                        <a href="#" class="text-light">
-                            <i class="fab fa-linkedin fa-2x"></i>
-                        </a>
-                    </li>
-                    <li class="list-inline-item">
-                        <a href="#" class="text-light">
-                            <i class="fab fa-instagram fa-2x"></i>
-                        </a>
-                    </li>
-                </ul>
+            <!-- Contact Info & Newsletter -->
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="400">
+                <div class="footer-widget">
+                    <h4 class="widget-title">Restez informé</h4>
+                    <p class="widget-text mb-4">Abonnez-vous à notre newsletter pour recevoir les dernières mises à jour et offres spéciales.</p>
+                    
+                    <form class="newsletter-form">
+                        <div class="input-group mb-3">
+                            <input type="email" class="form-control" placeholder="Votre email" aria-label="Email" required>
+                            <button class="btn btn-primary" type="submit">S'abonner</button>
+                        </div>
+                    </form>
+                    
+                    <div class="social-links mt-4">
+                        <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
             </div>
         </div>
 
+        <!-- Divider -->
+        <hr class="footer-divider my-4">
+
         <!-- Copyright Section -->
-        <div class="row mt-3">
-            <div class="col text-center">
-                <p>&copy; 2025 SurveyMaster. All rights reserved.</p>
+        <div class="row">
+            <div class="col-md-6">
+                <p class="copyright-text">&copy; 2025 EMD Sondage. Tous droits réservés.</p>
+            </div>
+            <div class="col-md-6 text-md-end">
+                <p class="credit-text">Conçu avec <i class="fas fa-heart text-danger"></i> par l'équipe EMD</p>
             </div>
         </div>
     </div>
 </footer>
 
-<!-- Optional: CSS Styling for the footer -->
+<!-- Footer CSS Styling -->
 <style>
-    footer {
-        background-color: #182848;
-        color: #fff;
+    .footer-section {
+        background-color: var(--dark-color);
+        color: rgba(255, 255, 255, 0.8);
+        position: relative;
     }
-    footer a {
+    
+    .widget-title {
+        color: #fff;
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        position: relative;
+        padding-bottom: 0.75rem;
+    }
+    
+    .widget-title::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 40px;
+        height: 3px;
+        background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+        border-radius: 2px;
+    }
+    
+    .widget-text {
+        margin-bottom: 1.5rem;
+        font-size: 0.95rem;
+        line-height: 1.7;
+    }
+    
+    .widget-links {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .widget-links li {
+        margin-bottom: 0.75rem;
+    }
+    
+    .widget-links a {
+        color: rgba(255, 255, 255, 0.8);
         text-decoration: none;
-        color: #fff;
+        transition: all 0.3s ease;
+        font-size: 0.95rem;
+        display: inline-block;
     }
-    footer a:hover {
-        text-decoration: underline;
-        color: #f39c12;
+    
+    .widget-links a:hover {
+        color: var(--primary-color);
+        transform: translateX(5px);
+    }
+    
+    .social-links {
+        display: flex;
+        gap: 12px;
+    }
+    
+    .social-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        color: #fff;
+        transition: all 0.3s ease;
+    }
+    
+    .social-link:hover {
+        background-color: var(--primary-color);
+        color: #fff;
+        transform: translateY(-5px);
+    }
+    
+    .newsletter-form .form-control {
+        background-color: rgba(255, 255, 255, 0.1);
+        border: none;
+        color: #fff;
+        padding: 12px 15px;
+        border-radius: 50px 0 0 50px;
+    }
+    
+    .newsletter-form .form-control::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+    }
+    
+    .newsletter-form .btn {
+        border-radius: 0 50px 50px 0;
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        padding: 12px 20px;
+    }
+    
+    .newsletter-form .btn:hover {
+        background-color: var(--primary-dark);
+    }
+    
+    .footer-divider {
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .copyright-text, .credit-text {
+        font-size: 0.9rem;
+        margin-bottom: 0;
+    }
+    
+    .badge-item img {
+        transition: transform 0.3s ease;
+    }
+    
+    .badge-item:hover img {
+        transform: scale(1.05);
+    }
+    
+    @media (max-width: 768px) {
+        .widget-title {
+            margin-top: 1.5rem;
+        }
     }
 </style>

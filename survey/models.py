@@ -40,6 +40,11 @@ class Question(models.Model):
 
     def __str__(self):
         return self.text
+        
+    def has_choices(self):
+        """Vérifie si la question a des choix associés."""
+        return self.question_type in [self.SINGLE_CHOICE, self.MULTIPLE_CHOICE] and self.choices.exists()
+
 
 class Choice(models.Model): 
     question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='choices')
