@@ -10,106 +10,125 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <!-- Custom CSS for enhancements -->
     <style>
-        .navbar-custom {
-            background: linear-gradient(90deg, #4b6cb7, #182848); /* Gradient background */
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Soft shadow */
-            transition: background 0.3s ease;
+        .navbar {
+            background-color: var(--card-bg);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
         }
+        
         .navbar-brand {
-            font-size: 1.75rem;
-            font-weight: bold;
-            color: #fff;
-            transition: color 0.3s ease;
+            font-weight: 700;
+            font-size: 1.4rem;
+            color: var(--primary-color);
         }
-        .navbar-brand:hover {
-            color: #ddd;
+        
+        .navbar-brand span {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
+        
         .nav-link {
-            color: #fff !important;
-            font-size: 1.1rem;
-            transition: color 0.3s ease;
+            font-weight: 500;
+            color: var(--dark-color);
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
         }
-        .nav-link:hover {
-            color: #ddd !important;
-            text-decoration: underline;
+        
+        .nav-link:hover, .nav-link:focus {
+            color: var(--primary-color);
+            background-color: rgba(99, 102, 241, 0.08);
         }
-        .nav-item.active .nav-link {
-            color: #f39c12 !important; /* Highlight for active link */
+        
+        .nav-link.active {
+            color: var(--primary-color);
+            background-color: rgba(99, 102, 241, 0.12);
         }
-        .search-bar {
-            max-width: 300px;
-            margin-right: 20px;
+        
+        body.dark-theme .navbar {
+            background-color: #1f2937;
         }
-        .mode-toggle {
-            color: #fff;
-            font-size: 1.5rem;
-            cursor: pointer;
-            transition: color 0.3s ease;
+        
+        body.dark-theme .nav-link {
+            color: #f3f4f6;
         }
-        .mode-toggle:hover {
-            color: #f39c12; /* Gold effect */
+        
+        body.dark-theme .dropdown-menu {
+            background-color: #374151;
+            border-color: #4b5563;
         }
-        .navbar-toggler {
-            border: none;
-            outline: none;
-        }
-        .navbar-toggler-icon {
-            background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba%28112,112,112, 0.5%29' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
-        }
-        .dark-mode-toggle {
-            animation: rotate-icon 0.5s ease;
-        }
-        @keyframes rotate-icon {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+        
+        body.dark-theme .dropdown-item {
+            color: #f3f4f6;
         }
     </style>
 </head>
 <body>
     <!-- Navigation Bar -->
-    <nav class="navbar navbar-expand-lg navbar-custom">
-        <div class="container-fluid">
-            <!-- Brand Logo/Name -->
-            <a class="navbar-brand" href="{% url "liste" %}"><i class="fas fa-poll"></i> EMDsondage</a>
-            <!-- Toggler Button for Mobile -->
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
+    <nav class="navbar navbar-expand-lg sticky-top" aria-label="Navigation principale">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="{% url 'liste' %}">
+                <i class="fas fa-poll-h me-2 text-primary"></i>
+                <span>EMD Sondage</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" 
+                    aria-controls="navbarMain" aria-expanded="false" aria-label="Afficher le menu de navigation">
+                <i class="fas fa-bars"></i>
             </button>
-
-            <!-- Collapsible Content -->
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto align-items-center">
-                    <li class="nav-item active">
-                        <a class="nav-link" aria-current="page" href="#"><i class="fas fa-home"></i> Home</a>
-                    </li>
+            
+            <div class="collapse navbar-collapse" id="navbarMain">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link" href="#"><i class="fas fa-list"></i> Surveys</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#"><i class="fas fa-envelope"></i> Contact</a>
-                    </li>
-                    <!-- Search Bar -->
-                    <li class="nav-item">
-                        <form class="d-flex search-bar">
-                            <input class="form-control me-2" type="search" placeholder="Search surveys..." aria-label="Search">
-                            <button class="btn btn-outline-light" type="submit"><i class="fas fa-search"></i></button>
-                        </form>
-                    </li>
-                    <!-- Dropdown Menu -->
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-user"></i> Menu
+                        <a class="nav-link {% if request.path == '/' %}active{% endif %}" 
+                           aria-current="{% if request.path == '/' %}page{% endif %}" href="{% url 'liste' %}">
+                            <i class="fas fa-home me-1"></i> Accueil
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                            <li><a class="dropdown-item" href="{% url "register" %}">Inscription</a></li>
-                            <li><a class="dropdown-item" href="{% url "login" %}">Connexion</a></li>
+                    </li>
+                    
+                    {% if request.user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if '/survey/create/' in request.path %}active{% endif %}" 
+                           href="{% url 'create_survey' %}">
+                            <i class="fas fa-plus-circle me-1"></i> Créer un sondage
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-circle me-1"></i> {{ user.first_name }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <li><h6 class="dropdown-header">{{ user.email }}</h6></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{% url "logout" %}">Déconnexion</a></li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'logout' %}">
+                                    <i class="fas fa-sign-out-alt me-2"></i> Déconnexion
+                                </a>
+                            </li>
                         </ul>
                     </li>
-                    <!-- Dark Mode Toggle -->
+                    {% else %}
                     <li class="nav-item">
-                        <span class="mode-toggle" id="modeToggle" title="Toggle Dark Mode">&#9728;</span>
+                        <a class="nav-link" href="{% url 'login' %}">
+                            <i class="fas fa-sign-in-alt me-1"></i> Connexion
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'users:register' %}">
+                            <i class="fas fa-user-plus me-1"></i> Inscription
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    <li class="nav-item ms-lg-2">
+                        <button class="btn btn-sm btn-outline-primary rounded-circle" 
+                                onclick="toggleTheme()" 
+                                aria-label="Basculer entre le thème clair et sombre">
+                            <i class="fas fa-moon"></i>
+                        </button>
                     </li>
                 </ul>
             </div>
